@@ -1,0 +1,114 @@
+ import requests
+ import matplotlib.pyplot as plt
+ import numpy as np
+
+ # Replace with your actual API key
+ API_KEY = "88b35a8e74b5cbf4117d0e97329bfd05"
+
+ def get_weather_data(city_name):
+     """Fetches weather data for a given city from OpenWeatherMap API.
+     Args:
+         city_name (str): The name of the city for which to fetch weather data.
+     Returns:
+         dict: A dictionary containing weather data, or None if there was an error.
+     """
+     base_url = "http://api.openweathermap.org/data/2.5/forecast"
+     params = {
+         "q": city_name,
+         "appid": API_KEY,
+         "units": "metric",  # Use metric units for Celsius
+     }
+
+     try:
+         response = requests.get(base_url, params=params)
+         response.raise_for_status()  # Raise an exception for bad status codes (e.g., 404, 500)
+         data = response.json()
+         return data
+     except requests.exceptions.RequestException as e:
+         print(f"Error fetching weather data: {e}")
+         return None
+
+ def extract_relevant_data(data):
+     """Extracts relevant weather data from the API response.
+
+     Args:
+         data (dict): The weather data in the format returned by the OpenWeatherMap API
+
+     Returns:
+       list of lists : The extracted temperatures, times, and wind speeds.
+     """
+
+     if data and data['cod'] == "200" and 'list' in data:
+       timestamps = [entry['dt_txt'] for entry in data['list']]
+       temperatures = [entry['main']['temp'] for entry in data['list']]
+       wind_speeds = [entry['wind']['speed'] for entry in data['list']]
+       return temperatures, timestamps, wind_speeds
+     else:
+       print("Invalid or no data available.")
+       return [], [], []
+
+
+
+ def create_temperature_plot(temperatures, timestamps, city_name):
+     """Creates a bar plot of temperature and saves it as a PNG file.
+
+     Args:
+         temperatures (list): List of temperatures.
+         timestamps (list): List of timestamps.
+         city_name (str): The name of the city for plot titles.
+     """
+
+     x_values = np.arange(len(timestamps))
+     plt.figure(figsize=(12, 6))
+     plt.bar(x_values, temperatures, color='skyblue')
+     plt.xlabel("Time (Every 3 hours)")
+     plt.ylabel("Temperature (°C)")
+     plt.title(f"Temperature Variation in {city_name} Over 5 Days")
+     plt.xticks(x_values, [timestamp.split(" ")[1] for timestamp in timestamps], rotation=45, ha="right") # ha = horizontal alignment
+     plt.tight_layout() # Adjust layout to prevent labels from overlapping
+     plt.savefig(f"{city_name}_temperature_plot.png")
+     plt.show() # Show the chart
+
+ def create_windspeed_plot(wind_speeds, timestamps, city_name):
+     """Creates a line plot of wind speed and saves it as a PNG file.
+
+     Args:
+         wind_speeds (list): List of wind speeds.
+         timestamps (list): List of timestamps.
+         city_name (str): The name of the city for plot titles.
+     """
+
+     x_values = np.arange(len(timestamps))
+     plt.figure(figsize=(12, 6))
+     plt.plot(x_values, wind_speeds, marker='o', linestyle='-', color='coral')
+     plt.xlabel("Time (Every 3 hours)")
+     plt.ylabel("Wind Speed (m/s)")
+     plt.title(f"Wind Speed Variation in {city_name} Over 5 Days")
+     plt.xticks(x_values, [timestamp.split(" ")[1] for timestamp in timestamps], rotation=45, ha="right")
+     plt.tight_layout()
+     plt.savefig(f"{city_name}_windspeed_plot.png")
+     plt.show() # Show the chart
+
+
+ def main():
+     """Main function to fetch data and generate visualizations"""
+
+     city_name = "London"  # Change this to your desired city
+     weather_data = get_weather_data(city_name)
+
+     if weather_data:
+         temperatures, timestamps, wind_speeds = extract_relevant_data(weather_data)
+
+         if temperatures:
+             create_temperature_plot(temperatures, timestamps, city_name)
+         if wind_speeds:
+             create_windspeed_plot(wind_speeds, timestamps, city_name)
+         print(f"Visualization Dashboard for {city_name} created")
+
+     else:
+         print("Failed to retrieve weather data.")
+
+
+
+ if __name__ == "__main__":
+     main()
