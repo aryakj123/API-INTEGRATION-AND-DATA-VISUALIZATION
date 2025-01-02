@@ -1,3 +1,18 @@
+**Name:** ARYA K J
+
+**Company:** CODTECH IT SOLUTIONS
+
+**ID:** CT08EQI
+
+**Domain:** Python Programming
+
+**Duration:** December 20,2024-January 20,2025
+
+**Mentor:** SRAVANI GOUNI
+
+
+### Description of Task###
+
 This Python script acts as a simple weather data visualization tool. It leverages the OpenWeatherMap API to retrieve weather forecasts and then uses matplotlib to generate visual representations of the data. Here's a detailed look:
 
 Import Libraries:
